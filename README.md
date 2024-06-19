@@ -13,13 +13,12 @@ This repository contains 4 code files that together produce the results of the r
 3. VAR_Analysis_EDA.py contains python code that executed exploratory data analysis and produces csv/xlsx files containing (selected) descriptive statistics, correlations, histograms, and t-test results from the data files.
 4. VAR_Analysis_Regressions.py contains python code that performs various Fixed-Effects and Difference-in-Difference analyses. It also produces one more file containing descriptives and t-test results of specific subsets of the data.
 
-This repository contains 6 data .csv files that the code files produce and/or require to run. 
+This repository contains 5 data .csv files that the code files produce and/or require to run. 
 1. Rankings_All_LeagueSeasons.csv is a file containing all rankings data that the scraper produces, with limited cleaning.
-2. Matches_main_full.csv is a file containing all matchdata that the scraper produces, before only a subset of interesting columns are selected for further analysis. 
-3. Matchdata_main.csv is a file containing all matchdata that the scraper produces, after selecting only a subset of interesting columns to keep.
-4. Rankings_Full_Analysis.csv is a file that contains cleaned and prepared data pertaining to league-tables with the full detail on team entries in each table.
-5. Rankings_Analysis.csv is a file that contains cleaned and prepared data from the league-tables pertaining to league only, this data is aggregated at the league-level and contains league data but no data on individual teams in the rankings.
-6. Matches_Analysis is a file that contains the cleaned and prepared data pertaining to matches.  
+2. Matchdata_main.csv is a file containing all matchdata that the scraper produces, after selecting only a subset of interesting columns to keep.
+3. Rankings_Full_Analysis.csv is a file that contains cleaned and prepared data pertaining to league-tables with the full detail on team entries in each table.
+4. Rankings_Analysis.csv is a file that contains cleaned and prepared data from the league-tables pertaining to league only, this data is aggregated at the league-level and contains league data but no data on individual teams in the rankings.
+5. Matches_Analysis is a file that contains the cleaned and prepared data pertaining to matches.  
 
 **Instructions**
 
