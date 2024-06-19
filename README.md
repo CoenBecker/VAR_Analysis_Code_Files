@@ -23,7 +23,7 @@ This repository contains 6 data .csv files that the code files produce and/or re
 
 **Instructions**
 
-- **Important note**: the VAR_Analysis_Scrapers file sometimes fails to collect the data on rankings due to an apparent irregular bug in line :  
+- **Important note**: the VAR_Analysis_Scrapers file sometimes fails to collect the data on rankings due to an apparent irregular bug in line 92, where the code 'pd.read_html(data.text)[0]' fails to retrieve the standings table from the html. In case this happens the code has worked again without any change the next day, but the rest of the files will run in any case and the Rankings_All_LeagueSeasons.csv file can be use to bypass this problematic step and skip ahead in any case.    
 - All code files are ready to run and require only basic Python packages such as Pandas, Numpy, BeautifulSoup, Seaborn, Scipy.stats, Statsmodels. However, in some versions of Python and/or depending on code editor the packages 'requests', 'pandas', and 'beautifulsoup4' must first be installed. All three can be installed by running the command 'pip install ' followed by the package name as written here from the command line, which does require that pip itself is installed. 
 - All four code files contain code that needs to read and write files to and from a specified directory. Running the code will automatically prompt the setting of this directory, but care must be taken that a correct and safe directory is set.
 - Code in the scraper files can be manually adjusted to get a different selection of leagues and seasons from the sources, provided these are available and appropriately specified.
