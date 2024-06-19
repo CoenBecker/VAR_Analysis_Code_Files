@@ -392,3 +392,117 @@ for dv in ['Prob_Entropy', 'Absolute Spread Home_Away', 'Nominal Spread Home_Awa
            'Home Probability', 'Draw Probability', 'Away Probability']:
     print('High CB panel analyses')
     regmodelerVAR(dv, highCBmatch)
+
+
+# Addition of regression with HRCB as a moderator
+
+# Define the function
+def regmodeler(data, y, xvar=['VAR'], c=False):
+    # if y contains whitespace, fix
+    y_fix = y.replace(' ', '')
+    data.rename(columns={y: y_fix}, inplace=True)
+    # if xvar contains whitespace
+    for x in xvar:
+        if x != x.replace(' ', ''):
+            x_fix = x.replace(' ', '')
+            data = data.rename(columns={x: x_fix})
+            xvar.remove(x)
+            xvar.append(x_fix)
+    # if an interaction term is included of variables with spaces
+    if c != False:
+        for ivar in c:
+            if ivar != ivar.replace(' ', ''):
+                ivar_fix = ivar.replace(' ', '')
+                data = data.rename(columns={ivar: ivar_fix})
+                c.remove(ivar)
+                c.append(ivar_fix)
+
+    # Define x and y
+    y_name = y_fix
+    x_names = xvar
+
+    # Define dummy source variables
+    league = "League ID"
+    time = "Season"
+
+    # Create a string-values variable of season to avoid reg. equation error when variable names are composed of only numbers
+    data['SeasonString'] = [f"S{t}" for t in data[time]]
+
+    # Get dummies
+    league_dummies = pd.get_dummies(data[league])
+    time_dummies = pd.get_dummies(data['SeasonString'])
+    data = data.join(league_dummies)
+    data = data.join(time_dummies)
+
+    # omit obs with missing dv values
+    data = data.dropna(subset=y_name)
+
+    # define regression equations
+    # league and season FE - baseline level 2
+    mdl1 = f"{y_name} ~"
+    i = 0
+    for dumset in [league_dummies[:-1], time_dummies[:-1]]:
+        for dummy in dumset.columns[:-1]:
+            if i > 0:
+                mdl1 = f"{mdl1} + {dummy}"
+            else:
+                mdl1 = f"{mdl1} {dummy}"
+            i += 1
+
+    # Add in VAR (or other main IV)
+    mdl2 = f"{mdl1} + {x_names[0]}"
+
+    # Add in other IVs
+    mdl3 = f"{mdl2}"
+    for var in x_names[1:]:
+        mdl3 = f"{mdl3} + {var}"
+
+    # Add in interaction
+    mdl4 = False  # default
+    if c != False:
+        mdl4 = f"{mdl3} + {c[0]}:{c[1]}"
+
+    # Run and present models
+    mdl_list = [mdl1, mdl2, mdl3]
+    if mdl4 != False:
+        mdl_list.append(mdl4)
+
+    for mdl in mdl_list:
+        print(mdl)
+        model = smf.ols(mdl, data=data)
+        model_results = model.fit()
+        print(model_results.summary())
+        print(" ")
+
+    return
+
+
+# Add HRCB to match data
+
+# Convert season to string and concat with league id to get unique league-season identifiers
+matches['SeasonString'] = [str(x) for x in matches['Season']]
+matches['LeagueSeason'] = matches['League ID'] + matches['SeasonString']
+
+# Do the same to get league-season identifier in rankings data
+ragg['SeasonString'] = [str(x) for x in ragg['Season']]
+ragg['LeagueSeason'] = ragg['League ID'] + ragg['SeasonString']
+
+# To check if the number of unique league-seasons in matches data is the same as in ragg for the dictionary
+print(len(matches['LeagueSeason'].unique()) == len(ragg['LeagueSeason'].unique()))
+
+# Create a dictionary with the values of CB (by HRCB) for each league-season in aggregated rankings data.
+LS_CB_dict = dict()
+for i in range(0, len(ragg['LeagueSeason'])):
+    LS_CB_dict[ragg['LeagueSeason'][i]] = ragg['PPM HRCB'][i]
+
+# Assign HRCB values to each match observation
+matches['HRCB'] = [LS_CB_dict[i] for i in matches['LeagueSeason']]
+
+# Check to see if it is done correctly
+magg = matches.groupby(['LeagueSeason'], as_index=False).mean().sort_values(by='LeagueSeason')
+ragg = ragg.sort_values(by='LeagueSeason')
+print(list(magg['HRCB'].round(10)) == list(ragg['PPM HRCB'].round(10)))
+
+# Run the model
+for dv in ['Prob_Entropy', 'Nominal Spread Home_Away']:
+    regmodeler(matches, dv, ['VAR', 'HRCB'], ['VAR', 'HRCB'])
